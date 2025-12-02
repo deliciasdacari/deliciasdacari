@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Delícias da Cari | Healthy Experience</title>
+    
+    <!-- Meta Tags -->
+    <meta property="og:title" content="Delícias da Cari | Arte no Pote">
+    <meta property="og:description" content="Monte sua salada gourmet personalizada. Saúde e sabor em cada camada.">
+    <meta name="theme-color" content="#1a2e1a">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400;1,600&family=Dancing+Script:wght@700&family=Manrope:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Confetti Script (Defer para performance) -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
+
+    <style>
+        /* --- CORE VARS --- */
+        :root {
+            /* Palette Premium - Modo Claro (Default) */
+            --c-bg-base: #f7f5f0;       
+            --c-bg-surface: #ffffff;    
+            
+            --c-primary: #2d4a32;       
+            --c-primary-dark: #1b301f;
+            --c-accent: #c49a6c;        
+            
+            --c-text-main: #1a1a1a;     
+            --c-text-body: #2c3e30;     
+            --c-text-muted: #5c6b61;
+            
+            --glass-panel: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.6);
+            --glass-blur: 20px;
+            
+            --shadow-elevation: 0 10px 40px -5px rgba(0,0,0,0.1);
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Dark Mode overrides */
+        body.dark-mode {
+            --c-bg-base: #0a0f0c;
+            --c-bg-surface: #1e2621;
+            
+            --c-primary: #4a7a52;       
+            --c-primary-dark: #8fb395;
+            
+            --c-text-main: #ffffff;
+            --c-text-body: #e0e0e0;
+            --c-text-muted: #a0a0a0;
+            
+            --glass-panel: rgba(20, 25, 22, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        /* --- RESET & BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
+        
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: var(--c-bg-base);
+            color: var(--c-text-body);
+            height: 100dvh;
+            width: 100vw;
+            overflow: hidden;
+            transition: background-color 0.8s ease, color 0.5s ease;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Background Texture & Orbs */
+        .noise-overlay {
+            position: fixed; inset: 0; pointer-events: none; z-index: 2; opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        .orb-container {
+            position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none;
+        }
+        .orb {
+            position: absolute; border-radius: 50%;
+            filter: blur(80px); opacity: 0.4;
+            animation: floatOrb 20s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .orb-1 { width: 400px; height: 400px; background: var(--c-primary); top: -100px; left: -100px; animation-duration: 25s; }
+        .orb-2 { width: 300px; height: 300px; background: var(--c-accent); bottom: -50px; right: -50px; animation-duration: 30s; animation-delay: -5s; }
+        .orb-3 { width: 200px; height: 200px; background: #e0d0b0; top: 40%; left: 60%; animation-duration: 35s; animation-delay: -10s; opacity: 0.3; }
+
+        @keyframes floatOrb {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(40px, 60px) rotate(20deg) scale(1.1); }
+        }
+
+        /* --- TYPOGRAPHY --- */
+        h1, h2, h3, .serif { font-family: 'Cormorant Garamond', serif; font-weight: 600; }
+        .script-font { font-family: 'Dancing Script', cursive; }
+        
+        h1 { color: var(--c-primary); }
+        body.dark-mode h1 { color: #f4f1ea; }
+
+        /* --- LAYOUT STRUCTURE --- */
+        .app-container {
+            position: relative; width: 100%; height: 100%; z-index: 10;
+            display: grid; grid-template-rows: 1fr auto;
+        }
+
+        .stage-viewport {
+            position: relative; width: 100%; height: 100%; overflow: hidden;
+        }
+
+        .view-section {
+            position: absolute; inset: 0; 
+            padding: 90px 20px 100px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transform: scale(1.02) translateY(15px); 
+            transition: all 0.8s var(--ease-out-expo);
+        }
+        
+        .view-section.active {
+            opacity: 1; pointer-events: all;
+            transform: scale(1) translateY(0); filter: blur(0);
+            z-index: 5;
+        }
+        
+        .view-section.leaving {
+            transform: scale(0.98) translateY(-15px); opacity: 0; filter: blur(8px);
+            transition-duration: 0.5s;
+        }
+
+        /* STAGGERED ANIMATIONS FOR TEXT */
+        .animate-up {
+            opacity: 0; transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 1, 0.3, 1);
+        }
+        .view-section.active .animate-up { opacity: 1; transform: translateY(0); }
+        .view-section.active .delay-1 { transition-delay: 0.1s; }
+        .view-section.active .delay-2 { transition-delay: 0.2s; }
+        .view-section.active .delay-3 { transition-delay: 0.3s; }
+        .view-section.active .delay-4 { transition-delay: 0.4s; }
+
+        .scroll-content {
+            width: 100%; max-width: 1000px; max-height: 100%;
+            overflow-y: auto; scrollbar-width: none;
+            padding: 10px;
+            /* Máscara de gradiente ajustada para dar hint visual de scroll */
+            mask-image: linear-gradient(to bottom, transparent, black 2%, black 85%, transparent 98%);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 2%, black 85%, transparent 98%);
+        }
+
+        /* Scroll Indicator (Seta flutuante) */
+        .scroll-indicator {
+            position: absolute; bottom: 130px; left: 50%; transform: translateX(-50%);
+            color: var(--c-primary); font-size: 1.5rem;
+            animation: bounceScroll 2s infinite;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s;
+            z-index: 20;
+            background: rgba(255,255,255,0.7);
+            border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        body.dark-mode .scroll-indicator { color: var(--c-accent); background: rgba(0,0,0,0.5); }
+        
+        .scroll-indicator.visible { opacity: 1; }
+
+        @keyframes bounceScroll {
+            0%, 20%, 50%, 80%, 100% {transform: translateX(-50%) translateY(0);}
+            40% {transform: translateX(-50%) translateY(-10px);}
+            60% {transform: translateX(-50%) translateY(-5px);}
+        }
+
+        /* --- NAVIGATION DOCK --- */
+        .nav-dock {
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(var(--glass-blur)); -webkit-backdrop-filter: blur(var(--glass-blur));
+            border: 1px solid var(--glass-border);
+            padding: 10px 30px; border-radius: 100px;
+            display: flex; gap: 35px; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-elevation);
+            z-index: 100; transition: all 0.3s ease;
+            width: auto; max-width: 90%;
+        }
+        
+        .nav-item {
+            background: none; border: none; 
+            color: var(--c-text-muted); position: relative;
+            display: flex; flex-direction: column; align-items: center;
+            transition: all 0.3s ease;
+            min-width: 50px;
+            cursor: pointer; /* ADICIONADO: Cursor de mão */
+        }
+        
+        /* HOVER EFFECT ADICIONADO */
+        .nav-item:hover {
+            color: var(--c-primary); /* Muda para cor da marca */
+            transform: translateY(-2px); /* Sobe um pouquinho */
+        }
+        body.dark-mode .nav-item:hover {
+            color: var(--c-accent); /* Dourado no modo escuro */
+        }
+        
+        .nav-icon { font-size: 1.4rem; margin-bottom: 4px; transition: transform 0.4s; }
+        .nav-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; opacity: 0.8; }
+        
+        .nav-item.active { color: var(--c-primary); }
+        body.dark-mode .nav-item.active { color: var(--c-accent); }
+        
+        .nav-item.active .nav-icon { transform: translateY(-3px); }
+        
+        .nav-indicator {
+            position: absolute; bottom: -8px; width: 4px; height: 4px; border-radius: 50%;
+            background: var(--c-primary); opacity: 0; transition: 0.3s;
+        }
+        body.dark-mode .nav-indicator { background: var(--c-accent); }
+        .nav-item.active .nav-indicator { opacity: 1; }
+
+        /* --- HERO SECTION --- */
+        .hero-layout {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
+            background: var(--glass-panel); padding: 30px; border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+        }
+        
+        .hero-visual { position: relative; }
+        .hero-img-container {
+            width: 100%; height: 400px; border-radius: 200px 200px 20px 20px; overflow: hidden;
+            box-shadow: var(--shadow-elevation); transform: rotate(-2deg); transition: transform 0.5s ease;
+        }
+        .hero-img-container:hover { transform: rotate(0deg) scale(1.02); }
+        .hero-img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .hero-content h1 { font-size: 3.5rem; line-height: 1.1; margin-bottom: 15px; }
+        
+        .hero-quote {
+            border-left: 4px solid var(--c-accent);
+            padding-left: 15px; margin: 20px 0;
+            font-style: italic; color: var(--c-text-main); font-weight: 500;
+            font-family: 'Cormorant Garamond'; font-size: 1.2rem;
+        }
+
+        .hero-content p { font-size: 1rem; line-height: 1.6; color: var(--c-text-body); margin-bottom: 15px; text-align: justify; }
+
+        /* Card de Dica/Conservação */
+        .tip-card {
+            background: rgba(212, 163, 115, 0.1); border: 1px dashed var(--c-accent);
+            border-radius: 16px; padding: 20px; margin-top: 25px;
+            display: flex; gap: 15px; align-items: flex-start;
+        }
+        .tip-icon { font-size: 1.8rem; color: var(--c-accent); }
+        .tip-text strong { display: block; color: var(--c-primary); margin-bottom: 4px; font-family: 'Cormorant Garamond'; font-size: 1.1rem; }
+        .tip-text p { font-size: 0.9rem; margin: 0; line-height: 1.4; color: var(--c-text-muted); opacity: 0.9; text-align: left; }
+        body.dark-mode .tip-text strong { color: var(--c-accent); }
+        
+        /* Botões */
+        .btn-cta {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 16px 40px; border-radius: 100px;
+            background: var(--c-primary); color: #ffffff !important;
+            font-family: 'Manrope'; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.85rem;
+            border: none; overflow: hidden; position: relative;
+            transition: all 0.4s ease; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            text-decoration: none; margin-top: 10px;
+            cursor: pointer; /* Cursor de mão */
+        }
+        .btn-cta:hover { transform: translateY(-3px); background: var(--c-primary-dark); }
+
+        /* BOTÃO MÁGICO DA IA */
+        .btn-magic-ai {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 12px 25px; border-radius: 100px;
+            background: linear-gradient(135deg, #d4a373 0%, #e0d0b0 100%);
+            color: #1a1a1a; font-family: 'Manrope'; font-weight: 800; font-size: 0.85rem;
+            border: none; cursor: pointer; margin-top: 15px; margin-left: 10px;
+            box-shadow: 0 5px 20px rgba(212, 163, 115, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-magic-ai:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 10px 30px rgba(212, 163, 115, 0.5); }
+        .btn-magic-ai i { color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+
+        /* MODAL IA */
+        .ai-modal-content { text-align: left; padding: 10px 10px; }
+        .ai-question-box { display: flex; flex-direction: column; gap: 15px; }
+        .ai-btn-option {
+            background: rgba(255,255,255,0.6); border: 1px solid var(--glass-border);
+            padding: 15px; border-radius: 12px; cursor: pointer; text-align: center;
+            font-family: 'Manrope'; font-weight: 600; color: var(--c-primary);
+            transition: 0.2s;
+        }
+        .ai-btn-option:hover { background: var(--c-primary); color: white; }
+        body.dark-mode .ai-btn-option { background: rgba(255,255,255,0.1); color: var(--c-text-main); }
+        body.dark-mode .ai-btn-option:hover { background: var(--c-accent); color: #000; }
+        .ai-note {
+            font-size: 0.85rem; color: var(--c-text-muted); margin-top: 15px; font-style: italic; text-align: center;
+            background: rgba(212, 163, 115, 0.1); padding: 10px; border-radius: 8px;
+        }
+
+        /* NOTIFICAÇÃO IA APLICADA NO RESUMO */
+        .ai-applied-msg {
+            background: linear-gradient(135deg, rgba(212, 163, 115, 0.2), rgba(58, 90, 64, 0.1));
+            border: 1px solid var(--c-accent); color: var(--c-primary);
+            padding: 15px; border-radius: 12px; margin-bottom: 20px;
+            font-size: 0.9rem; display: none; align-items: center; gap: 10px;
+        }
+        .ai-applied-msg.visible { display: flex; animation: fadeIn 0.5s; }
+        .ai-applied-msg i { color: var(--c-accent); font-size: 1.2rem; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .btn-insta-theme {
+            display: inline-flex; align-items: center; gap: 10px;
+            padding: 12px 30px; border-radius: 100px;
+            background: rgba(255,255,255,0.5); 
+            color: var(--c-primary);
+            font-family: 'Manrope'; font-weight: 700; font-size: 0.9rem;
+            border: 2px solid var(--c-primary); 
+            transition: all 0.3s ease; text-decoration: none;
+            margin-top: 15px;
+            cursor: pointer; /* Cursor de mão */
+        }
+        body.dark-mode .btn-insta-theme { color: var(--c-accent); border-color: var(--c-accent); background: rgba(0,0,0,0.2); }
+        .btn-insta-theme:hover {
+            background: var(--c-primary); color: white; transform: translateY(-2px);
+        }
+
+        /* --- WIZARD STYLES --- */
+        .wizard-stage { width: 100%; max-width: 900px; height: 100%; display: flex; flex-direction: column; position: relative; }
+        .wizard-header { margin-bottom: 20px; text-align: center; }
+        
+        .step-indicator { 
+            font-family: 'Manrope'; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; 
+            color: var(--c-accent); margin-bottom: 5px; display: block; font-weight: 800; 
+        }
+        
+        .wizard-progress-bar { width: 100%; height: 3px; background: rgba(0,0,0,0.05); margin-top: 20px; position: relative; border-radius: 3px; }
+        .wizard-progress-fill { position: absolute; top: 0; left: 0; height: 100%; background: var(--c-accent); width: 0%; transition: width 0.6s var(--ease-out-expo); border-radius: 3px; }
+        
+        .step-container { position: relative; flex: 1; }
+        
+        /* Adjusted step view logic for better transitions */
+        .step-view {
+            position: absolute; inset: 0; display: flex; flex-direction: column;
+            opacity: 0; pointer-events: none;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); /* Faster, smoother transition */
+            padding-bottom: 100px; overflow-y: auto; scrollbar-width: none;
+            transform: translateX(100px); /* Start from right */
+        }
+        
+        .step-view.active { 
+            opacity: 1; pointer-events: all; z-index: 2;
+            transform: translateX(0); /* Center */
+        }
+        
+        .step-view.prev { 
+            opacity: 0; pointer-events: none;
+            transform: translateX(-100px); /* Move to left */
+        }
+
+        .step-title { font-size: 2.2rem; color: var(--c-primary); margin-bottom: 8px; font-weight: 500; }
+        body.dark-mode .step-title { color: #f4f1ea; }
+        .step-subtitle { color: var(--c-text-muted); margin-bottom: 25px; font-weight: 400; font-size: 1.1rem; }
+
+        .options-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; padding-bottom: 20px; }
+
+        /* Card de Ingrediente */
+        .ing-card { position: relative; cursor: pointer; /* Cursor de mão */ }
+        .ing-input { position: absolute; opacity: 0; width: 0; height: 0; }
+        
+        .ing-visual {
+            background: var(--c-bg-surface); 
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 16px; padding: 20px 10px;
+            text-align: center; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            /* Add transparency for background blur effect */
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+        body.dark-mode .ing-visual { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+        
+        .ing-icon { font-size: 1.8rem; filter: grayscale(100%); transition: 0.3s; opacity: 0.7; }
+        .ing-name { font-size: 0.95rem; font-weight: 700; color: var(--c-text-body); transition: 0.3s; line-height: 1.2; }
+        
+        .ing-desc { 
+            font-size: 0.75rem; font-style: italic; color: var(--c-text-muted); opacity: 0.8; font-weight: 400;
+            margin-top: 2px;
+        }
+
+        /* HOVER EFFECT NOS CARDS DE INGREDIENTE */
+        .ing-card:hover .ing-visual {
+            border-color: var(--c-primary);
+            transform: translateY(-2px);
+        }
+        .ing-card:hover .ing-icon {
+            filter: grayscale(0%);
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .ing-card:hover .ing-name {
+            color: var(--c-primary);
+        }
+        body.dark-mode .ing-card:hover .ing-name {
+            color: var(--c-accent);
+        }
+
+        /* Ingrediente Selecionado */
+        .ing-input:checked + .ing-visual {
+            border-color: var(--c-primary); background: #f0f7f1; 
+            box-shadow: 0 10px 25px rgba(45, 74, 50, 0.15); transform: translateY(-4px);
+        }
+        body.dark-mode .ing-input:checked + .ing-visual { background: rgba(74, 122, 82, 0.2); }
+
+        .ing-input:checked + .ing-visual .ing-icon { filter: grayscale(0); transform: scale(1.15); opacity: 1; }
+        .ing-input:checked + .ing-visual .ing-name { color: var(--c-primary); font-weight: 800; }
+        body.dark-mode .ing-input:checked + .ing-visual .ing-name { color: var(--c-accent); }
+        .ing-input:checked + .ing-visual .ing-desc { opacity: 1; color: var(--c-text-body); }
+
+        /* ACTIONS BAR & BUTTONS (REDESIGNED) */
+        .wizard-actions { 
+            display: flex; gap: 20px; align-items: center; justify-content: space-between;
+            margin-top: 30px; padding-bottom: 20px;
+        }
+        
+        .btn-nav {
+            border-radius: 50px; border: none; cursor: pointer; /* Cursor de mão */
+            font-family: 'Manrope'; font-weight: 700; font-size: 0.95rem;
+            transition: all 0.3s ease; display: flex; align-items: center; gap: 10px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+        
+        .btn-prev {
+            padding: 16px 24px;
+            background: transparent; color: var(--c-text-muted); border: 1px solid rgba(0,0,0,0.1);
+        }
+        body.dark-mode .btn-prev { border-color: rgba(255,255,255,0.2); }
+        .btn-prev:hover { background: rgba(0,0,0,0.05); color: var(--c-text-main); transform: translateX(-3px); }
+        
+        /* BOTÃO AVANÇAR REDONDO E MODERNO */
+        .btn-next {
+            width: 60px; height: 60px; border-radius: 50%;
+            background: var(--c-primary); color: white; 
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            padding: 0; /* Remove padding extra */
+            cursor: pointer; /* Cursor de mão */
+        }
+        .btn-next i { font-size: 1.2rem; } /* Tamanho do ícone */
+        
+        .btn-next:hover { 
+            background: var(--c-primary-dark); 
+            transform: scale(1.1); /* Efeito de crescimento */
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25); 
+        }
+        .btn-next:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
+        
+        /* Botão Enviar Pedido (Texto + Ícone) - Mantém formato pílula para texto */
+        .btn-submit {
+            padding: 16px 32px; width: auto; height: auto; border-radius: 50px; cursor: pointer; /* Cursor de mão */
+        }
+        
+        /* Inputs do Formulário Final */
+        .final-form input, .final-form textarea {
+            width: 100%; 
+            background: rgba(255,255,255,0.9);
+            border: 1px solid rgba(0,0,0,0.1); border-bottom: 2px solid rgba(0,0,0,0.1);
+            padding: 16px; margin-bottom: 15px; 
+            font-family: 'Manrope'; font-size: 1rem; color: #000000;
+            transition: 0.3s; border-radius: 8px;
+            font-weight: 500;
+        }
+        body.dark-mode .final-form input, body.dark-mode .final-form textarea {
+            background: rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.1); color: #ffffff;
+        }
+
+        .final-form input:focus, .final-form textarea:focus { 
+            background: #ffffff; border-bottom-color: var(--c-primary); outline: none; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        ::placeholder { color: #888; opacity: 1; }
+        body.dark-mode ::placeholder { color: #aaa; }
+
+        .summary-card {
+            background: rgba(196, 154, 108, 0.1); padding: 20px; border-radius: 12px; 
+            border: 1px dashed var(--c-accent); margin-bottom: 25px;
+        }
+        
+        .price-warning {
+            font-size: 0.85rem; color: #8a6a4b; margin-bottom: 20px; 
+            display: flex; gap: 10px; align-items: center; font-weight: 600;
+            background: rgba(196, 154, 108, 0.15); padding: 12px; border-radius: 8px;
+        }
+        body.dark-mode .price-warning { color: var(--c-accent); }
+
+        /* --- UTILS --- */
+        .logo-float {
+            position: fixed; top: 25px; left: 50%; transform: translateX(-50%);
+            font-family: 'Cormorant Garamond'; font-size: 1.6rem; font-weight: 700; font-style: italic;
+            color: var(--c-primary); z-index: 100; pointer-events: none;
+            text-transform: uppercase; letter-spacing: 2px;
+        }
+        body.dark-mode .logo-float { color: #f4f1ea; }
+
+        #loader {
+            position: fixed; inset: 0; background: var(--c-bg-base); z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease;
+        }
+        .loader-txt { font-family: 'Cormorant Garamond'; font-size: 2rem; font-style: italic; animation: pulse 2s infinite; color: var(--c-primary); }
+        body.dark-mode .loader-txt { color: var(--c-accent); }
+
+        .custom-modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6); 
+            backdrop-filter: blur(8px); z-index: 9999;
+            display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .custom-modal-overlay.open { opacity: 1; pointer-events: all; }
+        .custom-modal-box {
+            background: var(--c-bg-surface); border: 1px solid var(--glass-border);
+            padding: 30px; border-radius: 24px; text-align: center; width: 85%; max-width: 350px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            transform: scale(0.9) translateY(20px); transition: transform 0.4s var(--ease-out-expo);
+        }
+        .custom-modal-overlay.open .custom-modal-box { transform: scale(1) translateY(0); }
+        .modal-title { font-size: 1.6rem; color: var(--c-primary); margin-bottom: 10px; line-height: 1.1; }
+        body.dark-mode .modal-title { color: #fff; }
+        .modal-text { font-size: 1rem; color: var(--c-text-muted); margin-bottom: 25px; }
+        .btn-modal {
+            background: var(--c-primary); color: white; border: none; padding: 12px 30px;
+            border-radius: 50px; font-weight: 600; transition: 0.3s; width: 100%; cursor: pointer; /* Cursor de mão */
+        }
+
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* MOBILE RESPONSIVE TWEAKS */
+        @media (max-width: 768px) {
+            .hero-layout { grid-template-columns: 1fr; text-align: center; gap: 20px; padding: 20px; }
+            .hero-img-container { height: 260px; width: 85%; margin: 0 auto; border-radius: 150px 150px 20px 20px; }
+            .hero-content h1 { font-size: 2.5rem; }
+            .step-title { font-size: 1.8rem; }
+            .options-grid { grid-template-columns: repeat(2, 1fr); }
+            .nav-dock { bottom: 20px; padding: 12px 25px; gap: 20px; width: 92%; justify-content: space-between; }
+            .nav-label { font-size: 0.6rem; }
+            .scroll-content { padding-bottom: 130px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LOADING SCREEN -->
+    <div id="loader">
+        <div class="loader-txt">Delícias da Cari</div>
+    </div>
+
+    <!-- CUSTOM ALERT MODAL -->
+    <div id="customModal" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <span style="font-size: 3rem; display:block; margin-bottom:10px; animation: bounce 2s infinite;" id="modalEmoji">🧐</span>
+            <h3 class="modal-title" id="modalTitle">Título</h3>
+            <p class="modal-text" id="modalMsg">Mensagem.</p>
+            <button onclick="closeModal()" class="btn-modal">Entendi</button>
+        </div>
+    </div>
+    
+    <!-- AI SUGGESTION MODAL (NEW) -->
+    <div id="aiModal" class="custom-modal-overlay">
+        <div class="custom-modal-box">
+            <span style="font-size: 2.5rem; display:block; margin-bottom:10px;">🤖✨</span>
+            <h3 class="modal-title">IA da Cari Te Ajuda</h3>
+            <p class="modal-text">Qual o seu objetivo hoje?</p>
+            
+            <div class="ai-modal-content">
+                <div class="ai-question-box">
+                    <div class="ai-btn-option" onclick="applySuggestion(1)">Quero algo Leve & Fit 🥗</div>
+                    <div class="ai-btn-option" onclick="applySuggestion(2)">Preciso de Energia 💪</div>
+                    <div class="ai-btn-option" onclick="applySuggestion(3)">Sou Vegetariano(a) 🌿</div>
+                </div>
+                <p class="ai-note">*Ao escolher, você será levado ao resumo final. Se quiser mudar algo, é só clicar em Voltar.</p>
+            </div>
+            
+            <button onclick="closeAiModal()" class="btn-nav btn-prev" style="width:100%; justify-content: center; margin-top: 15px;">Cancelar</button>
+        </div>
+    </div>
+
+    <!-- BACKGROUND LAYERS -->
+    <div class="noise-overlay"></div>
+    <div class="orb-container">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+    </div>
+
+    <!-- HEADER -->
+    <div class="logo-float">Delícias da Cari</div>
+    
+    <!-- WHATSAPP FLOATING (Esquerda Superior) -->
+    <a href="https://wa.me/+5571999007379" target="_blank" style="position: fixed; top: 25px; left: 25px; z-index: 101; color: var(--c-text-main); font-size: 1.6rem; transition: 0.3s;" class="hover-target">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <!-- APP CONTAINER -->
+    <div class="app-container">
+        
+        <div class="stage-viewport">
+            
+            <!-- HOME / QUEM SOMOS -->
+            <section id="view-home" class="view-section active">
+                <div class="scroll-content">
+                    <div class="hero-layout">
+                        <div class="hero-visual animate-up delay-1">
+                            <div class="hero-img-container">
+                                <img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Cari" class="hero-img">
+                            </div>
+                        </div>
+                        <div class="hero-content">
+                            <h1 class="script-font animate-up delay-2">Olá, sou a Cari! 👩‍🍳</h1>
+                            
+                            <div class="hero-quote animate-up delay-3">
+                                "Que seu remédio seja seu alimento, e que seu alimento seja seu remédio." — Hipócrates
+                            </div>
+
+                            <p class="animate-up delay-3">
+                                Carine é apaixonada por cuidar de pessoas, na saúde e na mesa. Graduada em Enfermagem, encontrou na culinária saudável uma forma de unir propósito, acolhimento e sabor. Assim nasceu a <strong>Delícias da Cari</strong>, um projeto que transforma alimentação equilibrada em praticidade e prazer para o dia a dia.
+                            </p>
+                            <p class="animate-up delay-3">
+                                Com receitas cuidadosamente desenvolvidas e ingredientes selecionados, Carine entrega potes nutritivos, saborosos e prontos para facilitar a rotina de quem busca leveza sem abrir mão do sabor. Seu diferencial está nos <strong>molhos artesanais</strong> à base de iogurte natural e especiarias, pensados para elevar qualquer refeição a uma experiência deliciosa.
+                            </p>
+                            <p class="animate-up delay-3">
+                                Mais do que comida, Carine acredita em cuidado: <em>comer bem é um gesto de amor consigo mesmo</em>. Sua missão é inspirar escolhas saudáveis, acolher histórias e tornar a alimentação consciente simples, afetiva e acessível.
+                            </p>
+                            
+                            <!-- Dica de Conservação -->
+                            <div class="tip-card animate-up delay-4">
+                                <i class="fas fa-snowflake tip-icon"></i>
+                                <div class="tip-text">
+                                    <strong>Dica da Cari: Conservação</strong>
+                                    <p>Sua salada no pote e molho duram até <strong>5 dias na geladeira</strong> (sem manipular). Praticidade pra semana toda!</p>
+                                </div>
+                            </div>
+                            
+                            <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-top: 20px;">
+                                <button onclick="navTo('order')" class="btn-cta animate-up delay-4 hover-target">
+                                    Iniciar Pedido <i class="fas fa-arrow-right"></i>
+                                </button>
+                                
+                                <button onclick="openAiModal()" class="btn-magic-ai animate-up delay-4 hover-target">
+                                    <i class="fas fa-magic"></i> IA da Cari Te Ajuda
+                                </button>
+                            </div>
+
+                            <div style="margin-top: 30px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 20px;" class="animate-up delay-4">
+                                <a href="https://www.instagram.com/deliciasda_cari" target="_blank" class="btn-insta-theme hover-target">
+                                    <i class="fab fa-instagram"></i> Siga no Instagram
+                                </a>
+                                <p style="font-size: 0.8rem; margin-top: 20px; font-style: italic; opacity: 0.7;">
+                                    "Não se pode pensar bem, amar bem, dormir bem, se não se jantou bem." — Virginia Woolf
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ORDER WIZARD -->
+            <section id="view-order" class="view-section">
+                <div class="scroll-content" style="height: 100%;" id="orderScrollContent">
+                    <form id="orderForm" class="wizard-stage">
+                        
+                        <div class="wizard-header animate-up delay-1">
+                            <span class="step-indicator" id="stepLabel">PASSO 01/07</span>
+                            <div class="wizard-progress-bar">
+                                <div class="wizard-progress-fill" id="progressFill"></div>
+                            </div>
+                        </div>
+
+                        <div class="step-container">
+
+                            <!-- Scroll Down Indicator -->
+                            <div id="scrollIndicator" class="scroll-indicator">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+
+                            <!-- Step 1: Molho -->
+                            <div class="step-view active" data-step="1">
+                                <h2 class="step-title animate-up delay-1">Escolha o Molho</h2>
+                                <p class="step-subtitle animate-up delay-2">A base do sabor. Escolha 1 opção.</p>
+                                <div class="options-grid animate-up delay-3">
+                                    <label class="ing-card hover-target"><input type="radio" name="camada1" value="Mostarda e mel" class="ing-input" required checked>
+                                        <div class="ing-visual">
+                                            <div class="ing-icon">🍯</div>
+                                            <span class="ing-name">Mostarda e Mel</span>
+                                            <span class="ing-desc">O queridinho da galera</span>
+                                        </div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada1" value="Iogurte c/ especiarias" class="ing-input">
+                                        <div class="ing-visual">
+                                            <div class="ing-icon">🥣</div>
+                                            <span class="ing-name">Iogurte c/ Esp.</span>
+                                            <span class="ing-desc">Leve e refrescante</span>
+                                        </div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada1" value="Tradicional" class="ing-input">
+                                        <div class="ing-visual">
+                                            <div class="ing-icon">🌿</div>
+                                            <span class="ing-name">Tradicional</span>
+                                            <span class="ing-desc">Simples e perfeito</span>
+                                        </div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada1" value="Parmesão" class="ing-input">
+                                        <div class="ing-visual">
+                                            <div class="ing-icon">🧀</div>
+                                            <span class="ing-name">Parmesão</span>
+                                            <span class="ing-desc">Cremoso e intenso</span>
+                                        </div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada1" value="Rosé" class="ing-input">
+                                        <div class="ing-visual">
+                                            <div class="ing-icon">🍅</div>
+                                            <span class="ing-name">Rosé</span>
+                                            <span class="ing-desc">Clássico atemporal</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Grãos -->
+                            <div class="step-view" data-step="2">
+                                <h2 class="step-title">Grãos</h2>
+                                <p class="step-subtitle">Energia. Escolha 1 opção.</p>
+                                <div class="options-grid">
+                                    <label class="ing-card hover-target"><input type="radio" name="camada2" value="Milho" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🌽</div><span class="ing-name">Milho</span><span class="ing-desc">Doce crocante</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada2" value="Ervilha" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🟢</div><span class="ing-name">Ervilha</span><span class="ing-desc">Verdinho básico</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada2" value="Grão-de-bico" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🟤</div><span class="ing-name">Grão-de-bico</span><span class="ing-desc">Rico em proteína</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada2" value="Feijão fradinho" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">⚪</div><span class="ing-name">Feijão Fradinho</span><span class="ing-desc">Nordestino raiz</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada2" value="Feijão branco" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🫘</div><span class="ing-name">Feijão Branco</span><span class="ing-desc">Macio e suave</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada2" value="Lentilha" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🍲</div><span class="ing-name">Lentilha</span><span class="ing-desc">Sorte e sabor</span></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Frescor -->
+                            <div class="step-view" data-step="3">
+                                <h2 class="step-title">Frutas & Legumes</h2>
+                                <p class="step-subtitle">Escolha até 2 opções.</p>
+                                <div class="options-grid">
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada3" value="Manga" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🥭</div><span class="ing-name">Manga</span><span class="ing-desc">Polêmica e amada</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada3" value="Abacaxi" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🍍</div><span class="ing-name">Abacaxi</span><span class="ing-desc">Citrus tropical</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada3" value="Pepino" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🥒</div><span class="ing-name">Pepino</span><span class="ing-desc">Crocante e fit</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada3" value="Cenoura ralada" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🥕</div><span class="ing-name">Cenoura</span><span class="ing-desc">Cor e vitamina</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada3" value="Beterraba ralada" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🟣</div><span class="ing-name">Beterraba</span><span class="ing-desc">Docinha da terra</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada3" value="Tomate cereja" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🍅</div><span class="ing-name">Tomate Cereja</span><span class="ing-desc">Explosão de sabor</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada3" value="Uva passa" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🍇</div><span class="ing-name">Uva Passa</span><span class="ing-desc">Ame ou odeie</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada3" value="Brócolis" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🥦</div><span class="ing-name">Brócolis</span><span class="ing-desc">Árvore da saúde</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada3" value="Batata doce" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🍠</div><span class="ing-name">Batata Doce (Cubos)</span><span class="ing-desc">Carbo do bem</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada3" value="Cebola roxa" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🧅</div><span class="ing-name">Cebola Roxa</span><span class="ing-desc">Toque gourmet</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada3" value="Cebola branca" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🧅</div><span class="ing-name">Cebola Branca</span><span class="ing-desc">Tempero clássico</span></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Proteína -->
+                            <div class="step-view" data-step="4">
+                                <h2 class="step-title">Proteína</h2>
+                                <p class="step-subtitle">A força do prato. Escolha 1 opção.</p>
+                                <div class="options-grid">
+                                    <label class="ing-card hover-target"><input type="radio" name="camada4" value="Carne moída" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🥩</div><span class="ing-name">Carne Moída</span><span class="ing-desc">Tempero de vó</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada4" value="Frango desfiado" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🍗</div><span class="ing-name">Frango Desfiado</span><span class="ing-desc">Levinho e proteico</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada4" value="Ovo codorna" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🥚</div><span class="ing-name">Ovo Codorna Cozido</span><span class="ing-desc">Pequeno notável (6un)</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada4" value="Ovo galinha" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🥚</div><span class="ing-name">Ovo Galinha Cozido</span><span class="ing-desc">O básico (2un)</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada4" value="Peito de peru" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🥓</div><span class="ing-name">Peito de Peru</span><span class="ing-desc">Fatias finas</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada4" value="Atum" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🐟</div><span class="ing-name">Atum</span><span class="ing-desc">Sabor do mar (Valor à parte)</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada4" value="Kani" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🦀</div><span class="ing-name">Kani</span><span class="ing-desc">Toque oriental (Valor à parte)</span></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Step 5: Folhas -->
+                            <div class="step-view" data-step="5">
+                                <h2 class="step-title">Folhas</h2>
+                                <p class="step-subtitle">Até 2 opções.</p>
+                                <div class="options-grid">
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada5" value="Alface crespa" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🥬</div><span class="ing-name">Alface Crespa</span><span class="ing-desc">Volume e textura</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada5" value="Alface americana" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🥬</div><span class="ing-name">Alface Americana</span><span class="ing-desc">Super crocante</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada5" value="Alface roxa" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">💜</div><span class="ing-name">Alface Roxa</span><span class="ing-desc">Cor no prato</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada5" value="Rúcula" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🌿</div><span class="ing-name">Rúcula</span><span class="ing-desc">Picante natural</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada5" value="Couve em tiras" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🥗</div><span class="ing-name">Couve</span><span class="ing-desc">Ferro puro</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="checkbox" name="camada5" value="Acelga" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🥬</div><span class="ing-name">Acelga</span><span class="ing-desc">Resistente e neutra</span></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Step 6: Sementes -->
+                            <div class="step-view" data-step="6">
+                                <h2 class="step-title">Sementes</h2>
+                                <p class="step-subtitle">Toque final. Escolha 1 opção.</p>
+                                <div class="options-grid">
+                                    <label class="ing-card hover-target"><input type="radio" name="camada6" value="Gergelim" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">✨</div><span class="ing-name">Gergelim</span><span class="ing-desc">Toque asiático</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada6" value="Linhaça" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🌾</div><span class="ing-name">Linhaça</span><span class="ing-desc">Fibra pura</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada6" value="Chia" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🌱</div><span class="ing-name">Chia</span><span class="ing-desc">Superalimento</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada6" value="Sem. Abóbora" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">🎃</div><span class="ing-name">Sem. Abóbora</span><span class="ing-desc">Crocante verde</span></div>
+                                    </label>
+                                    <label class="ing-card hover-target"><input type="radio" name="camada6" value="Sem Sementes" class="ing-input">
+                                        <div class="ing-visual"><div class="ing-icon">❌</div><span class="ing-name">Sem Sementes</span><span class="ing-desc">Prefiro sem</span></div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Step 7: Checkout -->
+                            <div class="step-view" data-step="7">
+                                <h2 class="step-title">Seu Pedido</h2>
+                                <p class="step-subtitle">Confirme os detalhes.</p>
+                                
+                                <!-- MENSAGEM DA IA -->
+                                <div id="aiAppliedMsg" class="ai-applied-msg">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>
+                                        <strong>Sugestão da IA aplicada!</strong><br>
+                                        Confira os itens abaixo. Se quiser mudar algo, é só clicar em <strong>VOLTAR</strong>.
+                                    </span>
+                                </div>
+                                
+                                <div class="summary-card">
+                                    <div id="summaryContent" style="font-family: 'Manrope'; font-size: 0.95rem; line-height: 1.8; color: var(--c-text-main);">
+                                        <!-- JS preencherá aqui -->
+                                    </div>
+                                </div>
+
+                                <div class="final-form">
+                                    <input type="text" name="nome" placeholder="Seu Nome Completo" required class="hover-target">
+                                    <input type="tel" name="telefone" placeholder="WhatsApp (DDD) 99999-9999" onkeyup="maskPhone(this)" required class="hover-target">
+                                    <textarea name="endereco" rows="2" placeholder="Endereço de Entrega Completo" required class="hover-target"></textarea>
+                                    <textarea name="obs" rows="2" placeholder="Alergias, intolerâncias, retirar ou acrescentar ingredientes..." class="hover-target"></textarea>
+                                    
+                                    <div class="price-warning">
+                                        <i class="fas fa-info-circle"></i>
+                                        <span>Nota: Adicionar ingredientes extras pode gerar alteração no valor final do pedido.</span>
+                                    </div>
+                                </div>
+
+                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 0.9rem; text-align: center;">
+                                    <span style="display:block; margin-bottom: 5px; opacity: 0.7; color: var(--c-text-main);">Chave PIX:</span>
+                                    <code style="font-size: 1rem; color: var(--c-primary); cursor: pointer;" onclick="copyPix(this)" class="hover-target">carinemilitao@gmail.com <i class="far fa-copy"></i></code>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Wizard Nav Actions (CORRIGIDO: Botão Avançar Redondo) -->
+                        <div class="wizard-actions">
+                            <button type="button" class="btn-nav btn-prev hover-target" onclick="changeStep(-1)" id="btnPrev">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </button>
+                            <!-- Botão Avançar agora redondo -->
+                            <button type="button" class="btn-next hover-target" onclick="changeStep(1)" id="btnNext">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <!-- NAVIGATION DOCK -->
+        <nav class="nav-dock">
+            <button class="nav-item active hover-target" onclick="navTo('home')">
+                <i class="fas fa-heart nav-icon"></i>
+                <span class="nav-label">Cari</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item hover-target" onclick="navTo('order')">
+                <i class="fas fa-utensils nav-icon"></i>
+                <span class="nav-label">Pedido</span>
+                <span class="nav-indicator"></span>
+            </button>
+            <button class="nav-item hover-target" onclick="toggleTheme()">
+                <i class="fas fa-moon nav-icon" id="themeIcon"></i>
+                <span class="nav-label">Tema</span>
+                <span class="nav-indicator"></span>
+            </button>
+        </nav>
+
+    </div>
+
+    <script>
+        // --- APP STATE & LOGIC ---
+        
+        window.onload = () => {
+            const loader = document.getElementById('loader');
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 800);
+            
+            const savedTheme = localStorage.getItem('theme');
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            
+            if (savedTheme === 'dark' || (!savedTheme && systemDark)) {
+                setTheme('dark');
+            } else {
+                setTheme('light');
+            }
+        };
+
+        // Scroll Indicator Logic
+        const scrollContent = document.getElementById('orderScrollContent');
+        const scrollIndicator = document.getElementById('scrollIndicator');
+
+        scrollContent.addEventListener('scroll', checkScroll);
+        
+        // Check scroll on step change too
+        function checkScroll() {
+            // Logic: if scrollHeight > clientHeight + scrollTop + tolerance, show indicator
+            const tolerance = 50; 
+            if (scrollContent.scrollHeight > scrollContent.clientHeight + scrollContent.scrollTop + tolerance) {
+                scrollIndicator.classList.add('visible');
+            } else {
+                scrollIndicator.classList.remove('visible');
+            }
+        }
+
+        function navTo(viewId) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const navItems = document.querySelectorAll('.nav-item');
+            if(viewId === 'home') navItems[0].classList.add('active');
+            if(viewId === 'order') navItems[1].classList.add('active');
+
+            const current = document.querySelector('.view-section.active');
+            const target = document.getElementById('view-' + viewId);
+            
+            if(current === target) return;
+
+            // RESET LOGIC WHEN GOING TO HOME
+            if (viewId === 'home') {
+                setTimeout(() => {
+                    // Reset form and wizard state
+                    document.getElementById('orderForm').reset();
+                    // Reset Visual Selection of Cards
+                    document.querySelectorAll('.ing-input').forEach(input => input.checked = false);
+                    // Reset state
+                    currentStep = 1;
+                    updateProgress();
+                    // Ensure Step 1 is active visually for next entry
+                     const steps = document.querySelectorAll('.step-view');
+                     steps.forEach(s => {
+                        s.classList.remove('active', 'prev');
+                        s.style.transform = ''; // Reset inline transform
+                     });
+                     steps[0].classList.add('active');
+                     // Hide AI message
+                     document.getElementById('aiAppliedMsg').classList.remove('visible');
+                     
+                }, 500);
+            } else if (viewId === 'order') {
+                // Always start fresh if coming from home
+                 if (current.id === 'view-home') {
+                     // Ensure form is reset if user goes Home -> Order
+                    document.getElementById('orderForm').reset();
+                    document.querySelectorAll('.ing-input').forEach(input => input.checked = false);
+                    currentStep = 1;
+                    updateProgress();
+                    
+                    const steps = document.querySelectorAll('.step-view');
+                     steps.forEach(s => {
+                        s.classList.remove('active', 'prev');
+                        s.style.transform = '';
+                     });
+                     steps[0].classList.add('active');
+                     // Hide AI message
+                     document.getElementById('aiAppliedMsg').classList.remove('visible');
+                 }
+            }
+
+            current.classList.add('leaving');
+            current.classList.remove('active');
+            
+            setTimeout(() => {
+                current.classList.remove('leaving');
+                target.classList.add('active');
+                if(viewId === 'order') setTimeout(checkScroll, 100); // Check scroll after transition
+                
+                // Reset scroll to top
+                if(viewId === 'order') {
+                    const stepView = document.querySelector('.step-view.active');
+                    if(stepView) stepView.scrollTop = 0;
+                }
+            }, 500);
+        }
+
+        function toggleTheme() {
+            const isDark = document.body.classList.contains('dark-mode');
+            setTheme(isDark ? 'light' : 'dark');
+        }
+
+        function setTheme(mode) {
+            const icon = document.getElementById('themeIcon');
+            if (mode === 'dark') {
+                document.body.classList.add('dark-mode');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        function showModal(title, message, emoji = '🧐') {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMsg').innerText = message;
+            document.getElementById('modalEmoji').innerText = emoji;
+            document.getElementById('customModal').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.remove('open');
+        }
+        
+        // AI MODAL FUNCTIONS
+        function openAiModal() {
+            document.getElementById('aiModal').classList.add('open');
+        }
+        function closeAiModal() {
+            document.getElementById('aiModal').classList.remove('open');
+        }
+        function applySuggestion(id) {
+            closeAiModal();
+            navTo('order');
+            // Timeout to let the transition happen then fill
+            setTimeout(() => {
+                // Reset first
+                document.querySelectorAll('.ing-input').forEach(i => i.checked = false);
+                
+                // Common reset
+                const setVal = (n, v) => {
+                    const el = document.querySelector(`input[name="${n}"][value="${v}"]`);
+                    if(el) el.checked = true;
+                };
+                
+                if(id === 1) { // Leve & Fit
+                    setVal('camada1', 'Iogurte c/ especiarias');
+                    setVal('camada2', 'Grão-de-bico');
+                    setVal('camada4', 'Frango desfiado');
+                    const c3 = document.querySelectorAll('input[name="camada3"]');
+                    c3.forEach(c => { if(c.value==='Pepino' || c.value==='Cenoura ralada') c.checked=true; });
+                    const c5 = document.querySelectorAll('input[name="camada5"]');
+                    c5.forEach(c => { if(c.value==='Alface americana' || c.value==='Rúcula') c.checked=true; });
+                    setVal('camada6', 'Chia');
+                }
+                if(id === 2) { // Energia Total
+                     setVal('camada1', 'Mostarda e mel');
+                     setVal('camada2', 'Milho');
+                     setVal('camada4', 'Carne moída');
+                     const c3 = document.querySelectorAll('input[name="camada3"]');
+                     c3.forEach(c => { if(c.value==='Batata doce' || c.value==='Brócolis') c.checked=true; });
+                     const c5 = document.querySelectorAll('input[name="camada5"]');
+                     c5.forEach(c => { if(c.value==='Alface crespa' || c.value==='Couve em tiras') c.checked=true; });
+                     setVal('camada6', 'Sem. Abóbora');
+                }
+                 if(id === 3) { // Veggie
+                     setVal('camada1', 'Tradicional');
+                     setVal('camada2', 'Lentilha');
+                     setVal('camada4', 'Ovo codorna'); // Corrected to available value
+                     const c3 = document.querySelectorAll('input[name="camada3"]');
+                     c3.forEach(c => { if(c.value==='Beterraba ralada' || c.value==='Tomate cereja') c.checked=true; });
+                     const c5 = document.querySelectorAll('input[name="camada5"]');
+                     c5.forEach(c => { if(c.value==='Alface roxa' || c.value==='Acelga') c.checked=true; });
+                     setVal('camada6', 'Linhaça');
+                }
+                
+                // Show message
+                document.getElementById('aiAppliedMsg').classList.add('visible');
+                
+                // Jump to Summary Step (7)
+                const steps = document.querySelectorAll('.step-view');
+                // Clear all active classes
+                steps.forEach(s => {
+                   s.classList.remove('active', 'prev');
+                   s.style.transform = '';
+                });
+                // Set step 7 as active
+                steps[6].classList.add('active');
+                // Set all previous to 'prev' to ensure correct animation if going back
+                for(let i=0; i<6; i++) steps[i].classList.add('prev');
+                
+                currentStep = 7;
+                updateProgress();
+                generateSummary();
+                
+            }, 600);
+        }
+
+        let currentStep = 1;
+        const totalSteps = 7;
+
+        function updateProgress() {
+            const pct = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            document.getElementById('progressFill').style.width = pct + '%';
+            document.getElementById('stepLabel').innerText = `PASSO 0${currentStep}/0${totalSteps}`;
+            
+            const nextBtn = document.getElementById('btnNext');
+            const prevBtn = document.getElementById('btnPrev');
+            
+            // LOGIC FOR BACK BUTTON VISIBILITY
+            prevBtn.style.visibility = 'visible';
+            
+            if(currentStep === totalSteps) {
+                // Change style for submit button
+                nextBtn.innerHTML = 'Enviar Pedido <i class="fas fa-paper-plane"></i>';
+                nextBtn.classList.add('btn-submit'); // Add class for styling
+                nextBtn.classList.remove('btn-next'); // Remove round style
+                nextBtn.style.background = '#25D366';
+            } else {
+                // Reset to arrow button
+                nextBtn.innerHTML = '<i class="fas fa-arrow-right"></i>';
+                nextBtn.classList.remove('btn-submit');
+                nextBtn.classList.add('btn-next'); // Ensure round style
+                nextBtn.style.background = '';
+            }
+            
+            setTimeout(checkScroll, 100); // Re-check scroll on step update
+            
+            // Scroll step view to top
+            const activeStep = document.querySelector('.step-view.active');
+            if(activeStep) activeStep.scrollTop = 0;
+        }
+
+        function changeStep(direction) {
+            const steps = document.querySelectorAll('.step-view');
+            
+            // Logic for Back Button on Step 1 -> Go to Home
+            if (direction === -1 && currentStep === 1) {
+                navTo('home');
+                return;
+            }
+
+            if(direction === 1 && currentStep < totalSteps) {
+                const activeStep = steps[currentStep-1];
+                const required = activeStep.querySelector('input[type="radio"], input[type="checkbox"]');
+                
+                // VALIDATION: Check if at least one option is selected if required
+                if(required) {
+                    const name = required.name;
+                    const checked = activeStep.querySelectorAll(`input[name="${name}"]:checked`);
+                    if(checked.length === 0) {
+                        shakeBtn();
+                        showModal("Ops, Gourmet!", "Selecione uma opção para continuar!", "🥗");
+                        return;
+                    }
+                }
+                if(currentStep === totalSteps) { submitOrder(); return; }
+            }
+            
+            if(direction === 1 && currentStep === totalSteps) { submitOrder(); return; }
+
+            if ((direction === 1 && currentStep < totalSteps) || (direction === -1 && currentStep > 1)) {
+                // Current slide leaves
+                steps[currentStep-1].classList.remove('active');
+                
+                // Determine direction class for exit animation
+                if(direction === 1) {
+                    steps[currentStep-1].classList.add('prev'); // Moved to left
+                } else {
+                    steps[currentStep-1].classList.remove('prev'); // Moved back to center (but actually logic handles enter)
+                }
+                
+                currentStep += direction;
+                
+                // New slide enters
+                steps[currentStep-1].classList.remove('prev');
+                steps[currentStep-1].classList.add('active');
+                
+                if(currentStep === totalSteps) generateSummary();
+                updateProgress();
+            }
+        }
+
+        function shakeBtn() {
+            const btn = document.getElementById('btnNext');
+            btn.style.animation = 'shake 0.4s';
+            setTimeout(() => btn.style.animation = '', 400);
+        }
+
+        function setupLimits(name, max) {
+            document.querySelectorAll(`input[name="${name}"]`).forEach(input => {
+                input.addEventListener('change', () => {
+                    if(document.querySelectorAll(`input[name="${name}"]:checked`).length > max) {
+                        input.checked = false;
+                        showModal("Calma lá!", `Você só pode selecionar até ${max} opções aqui.`, "✋");
+                    }
+                });
+            });
+        }
+        setupLimits('camada3', 2);
+        setupLimits('camada5', 2);
+
+        function maskPhone(input) {
+            let v = input.value.replace(/\D/g,'');
+            v = v.replace(/^(\d{2})(\d)/g,"($1) $2");
+            v = v.replace(/(\d)(\d{4})$/,"$1-$2");
+            input.value = v;
+        }
+
+        function copyPix(el) {
+            navigator.clipboard.writeText('carinemilitao@gmail.com');
+            const original = el.innerHTML;
+            el.innerHTML = 'Copiado!';
+            el.style.color = '#25D366';
+            setTimeout(() => {
+                el.innerHTML = original;
+                el.style.color = 'var(--c-primary)';
+            }, 2000);
+        }
+
+        function generateSummary() {
+            const getVal = n => document.querySelector(`input[name="${n}"]:checked`)?.value || '-';
+            const getArr = n => Array.from(document.querySelectorAll(`input[name="${n}"]:checked`)).map(i=>i.value).join(', ') || '-';
+
+            const html = `
+                <strong style="color:var(--c-primary)">Molho:</strong> ${getVal('camada1')}<br>
+                <strong style="color:var(--c-primary)">Grãos:</strong> ${getVal('camada2')}<br>
+                <strong style="color:var(--c-primary)">Frutas/Leg:</strong> ${getArr('camada3')}<br>
+                <strong style="color:var(--c-primary)">Proteína:</strong> ${getVal('camada4')}<br>
+                <strong style="color:var(--c-primary)">Folhas:</strong> ${getArr('camada5')}<br>
+                <strong style="color:var(--c-primary)">Sementes:</strong> ${getVal('camada6')}
+            `;
+            document.getElementById('summaryContent').innerHTML = html;
+        }
+
+        // ⚠️ SUBSTITUA PELA URL REAL DO SEU SCRIPT GOOGLE APPS SCRIPT
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw5OC3b5ECihSOtZX2kHXUhntH0S9M5r5-i_jE4crmj-62h12yCDPLB5dDvd6VQs_4krw/exec";
+
+        function submitOrder() {
+            const form = document.getElementById('orderForm');
+            if(!form.nome.value || !form.telefone.value || !form.endereco.value) {
+                showModal("Faltou algo!", "Preencha todos os campos de contato para finalizarmos!", "📝");
+                return;
+            }
+
+            const btn = document.getElementById('btnNext');
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+            
+            const data = {};
+            new FormData(form).forEach((value, key) => {
+                if(!data[key]) data[key] = value;
+                else data[key] += `, ${value}`;
+            });
+            const getArr = n => Array.from(document.querySelectorAll(`input[name="${n}"]:checked`)).map(i=>i.value).join(', ');
+            data.camada3 = getArr('camada3');
+            data.camada5 = getArr('camada5');
+
+            fetch(SCRIPT_URL, {
+                method: 'POST', body: JSON.stringify(data), mode: 'no-cors'
+            })
+            .then(() => {
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.6 } });
+                showModal("Sucesso Absoluto!", "Pedido enviado! A Cari agradece a preferência.", "🎉");
+                setTimeout(() => location.reload(), 4000);
+            })
+            .catch(err => {
+                showModal("Ops, Conexão!", "Erro ao enviar. Tente pelo WhatsApp.", "📡");
+                btn.innerHTML = 'Tentar Novamente';
+            });
+        }
+        
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-5px); } 100% { transform: translateX(0); } }
+        `;
+        document.head.appendChild(styleSheet);
+
+        updateProgress();
+    </script>
+</body>
+</html>
